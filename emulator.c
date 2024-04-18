@@ -37,26 +37,19 @@ uint8_t drawFlag = 0;
 uint8_t soundFlag = 0;
 
 void init_cpu() {
-    srand((unsigned int)time(NULL));
     memcpy(memory, fontset, sizeof(fontset));
 }
 
-int load_rom(char * filename) {
-    FILE *fptr = fopen(filename, 'rb');
-    if(fptr == NULL) {
-        // return an error number
+int load_rom(char *filename) {
+    FILE *fptr;
+    if((fptr = fopen(filename, "rb")) == NULL) {
+        printf("Error while loading rom file");
     }
-    struct stat st;
-    stat(filename, &st);
-    size_t filesize = st.st_size;
+    struct stat fileinfo;
+    stat(filename, fptr);
     size_t bytes_read = fread(memory + 0x200, 1, sizeof(memory) - 0x200, fptr);
-    fclose(fp);
-    if(bytes_read != filesize) {
+    fclose(fptr);
+    if(bytes_read = fileinfo.st_size)
         return -1;
-    }
     return 0;
-}
-
-void emulate_cycle() {
-
 }

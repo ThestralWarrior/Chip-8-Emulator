@@ -2,6 +2,7 @@
 #include<stdint.h>
 #include<sys/stat.h>
 #include<errno.h>
+#include<time.h>
 
 #define MEMORY_SIZE 4096
 
@@ -11,7 +12,7 @@ uint8_t V[16] = {0};
 uint8_t memory[MEMORY_SIZE] = {0};
 uint16_t I = 0;
 uint16_t PC = 0x200;
-uint8_t SP = 0;
+uint8_t SP = -1;
 uint16_t opcode = 0;
 uint16_t stack[16] = {0};
 uint8_t keypad[16] = {0};
@@ -62,21 +63,61 @@ void emulate_cycle() {
     drawFlag = 0;
     soundFlag = 0;
     opcode = memory[PC] << 8 | memory[PC + 1];
+    uint16_t address = 0;
+    uint8_t value = 0;
     uint8_t x = (opcode & 0x0F00) >> 8;
     uint8_t y = (opcode & 0x00F0) >> 4;
     switch(opcode & 0xF000) {
         case 0x0000:
             switch(opcode & 0x00FF) {
                 case 0x00E0:
+                    int i;
+                    for(i = 0; i < 64 * 32; i++) {
+                        display[i] = 0;
+                    }
+                    PC += 2;
+                    break;
                 case 0x00EE:
+                    PC = stack[SP--];
+                    PC += 2;
+                    break;
+                default:
+                    break;
             }
         case 0x1000:
+            address = opcode & 0x0FFF;
+            PC = address;
+            break;
         case 0x2000:
+            address = opcode & 0x0FFF;
+            stack[++SP] = PC;
+            PC = address;
+            break;
         case 0x3000:
+            value = opcode & 0x00FF; 
+            if(V[x] == value) {
+                PC += 2;
+            }
+            break;
         case 0x4000:
+            value = opcode & 0x00FF;
+            if(V[x] != value) {
+                PC += 2;
+            }
+            break;
         case 0x5000:
+            if(V[x] == V[y]) {
+                PC += 2;
+            }
+            break;
         case 0x6000:
+            value = opcode & 0x00FF;
+            V[x] = value;
+            break;
         case 0x7000:
+            value = opcode & 0x00FF;
+            V[x] = V[x] + value;
+            break;
         case 0x8000:
             switch(opcode & 0x000F) {
                 case 0x0000:
@@ -88,12 +129,42 @@ void emulate_cycle() {
                 case 0x0006:
                 case 0x0007:
                 case 0x000E:
+                default:
+                    break;
             }
         case 0x9000:
+            if(V[x] != V[y]) {
+                PC += 2;
+            }
+            break;
         case 0xA000:
+            address = opcode & 0x0FFF;
+            I = address;
+            break;
         case 0xB000:
+            address = opcode & 0x0FFF;
+            PC = address + V[0];
+            break;
         case 0xC000:
+            value = opcode & 0x00FF;
+            srand(time(NULL));
+            int random = rand() % 256;
+            V[x] = random & value;
+            break;
         case 0xD000:
+            int height = opcode & 0x000F;
+            int row, column;
+            for(row = 0; row < height; row++) {
+                int pixel = memory[I + row];
+                for(column = 0; column < 8; column++) {
+                    if((pixel & (0x80 >> column)) != 0) {
+                        if(display[V[x] + column + ((V[y] + row) * 64)] == 1) {
+                            V[0xF] = 1;
+                        }
+                        display[V[x] + column + ((V[y] + row) * 64)] ^= 1;
+                    }
+                }
+            }
         case 0xE000:
             switch(opcode & 0x00FF) {
                 case 0x009E:
@@ -110,6 +181,10 @@ void emulate_cycle() {
                 case 0x0033:
                 case 0x0055:
                 case 0x0065:
+                default:
+                    break;
             }
+        default:
+            break;
     }
 }

@@ -1,8 +1,11 @@
 #include<stdio.h>
 #include<stdint.h>
 #include<sys/stat.h>
+#include<errno.h>
 
 #define MEMORY_SIZE 4096
+
+extern int errno;
 
 uint8_t V[16] = {0};
 uint8_t memory[MEMORY_SIZE] = {0};
@@ -44,6 +47,7 @@ int load_rom(char *filename) {
     FILE *fptr;
     if((fptr = fopen(filename, "rb")) == NULL) {
         printf("Error while loading rom file");
+        return errno;
     }
     struct stat fileinfo;
     stat(filename, fptr);
@@ -52,4 +56,60 @@ int load_rom(char *filename) {
     if(bytes_read = fileinfo.st_size)
         return -1;
     return 0;
+}
+
+void emulate_cycle() {
+    drawFlag = 0;
+    soundFlag = 0;
+    opcode = memory[PC] << 8 | memory[PC + 1];
+    uint8_t x = (opcode & 0x0F00) >> 8;
+    uint8_t y = (opcode & 0x00F0) >> 4;
+    switch(opcode & 0xF000) {
+        case 0x0000:
+            switch(opcode & 0x00FF) {
+                case 0x00E0:
+                case 0x00EE:
+            }
+        case 0x1000:
+        case 0x2000:
+        case 0x3000:
+        case 0x4000:
+        case 0x5000:
+        case 0x6000:
+        case 0x7000:
+        case 0x8000:
+            switch(opcode & 0x000F) {
+                case 0x0000:
+                case 0x0001:
+                case 0x0002:
+                case 0x0003:
+                case 0x0004:
+                case 0x0005:
+                case 0x0006:
+                case 0x0007:
+                case 0x000E:
+            }
+        case 0x9000:
+        case 0xA000:
+        case 0xB000:
+        case 0xC000:
+        case 0xD000:
+        case 0xE000:
+            switch(opcode & 0x00FF) {
+                case 0x009E:
+                case 0x00A1:
+            }
+        case 0xF000:
+            switch(opcode & 0x00FF) {
+                case 0x0007:
+                case 0x000A:
+                case 0x0015:
+                case 0x0018:
+                case 0x001E:
+                case 0x0029:
+                case 0x0033:
+                case 0x0055:
+                case 0x0065:
+            }
+    }
 }

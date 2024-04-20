@@ -54,7 +54,7 @@ int load_rom(char *filename) {
     stat(filename, fptr);
     size_t bytes_read = fread(memory + 0x200, 1, sizeof(memory) - 0x200, fptr);
     fclose(fptr);
-    if(bytes_read = fileinfo.st_size)
+    if(bytes_read != fileinfo.st_size)
         return -1;
     return 0;
 }
@@ -121,14 +121,49 @@ void emulate_cycle() {
         case 0x8000:
             switch(opcode & 0x000F) {
                 case 0x0000:
+                    V[x] = V[y];
+                    PC += 2;
+                    break;
                 case 0x0001:
+                    V[x] = V[x] | V[y];
+                    PC += 2;
+                    break;
                 case 0x0002:
+                    V[x] = V[x] & V[y];
+                    PC += 2;
+                    break;
                 case 0x0003:
+                    V[x] = V[x] ^ V[y];
+                    PC += 2;
+                    break;
                 case 0x0004:
+                    int sum = V[x] + V[y];
+                    if(sum > 255) V[0xF] = 1;
+                    V[x] = sum % 256;
+                    PC += 2;
+                    break;
                 case 0x0005:
+                    if(V[x] > V[y]) V[0xF] = 1;
+                    else V[0xF] = 0;
+                    V[x] = V[x] - V[y];
+                    PC += 2;
+                    break;
                 case 0x0006:
+                    V[0xF] = opcode & 0x1;
+                    V[x] /= 2;
+                    PC += 2;
+                    break;
                 case 0x0007:
+                    if(V[y] > V[x]) V[0xF] = 1;
+                    else V[0xF] = 0;
+                    V[x] = V[y] - V[x];
+                    PC += 2;
+                    break;
                 case 0x000E:
+                    V[0xF] = (opcode & 0x80) >> 7;
+                    V[x] *= 2;
+                    PC += 2;
+                    break;
                 default:
                     break;
             }
@@ -150,6 +185,7 @@ void emulate_cycle() {
             srand(time(NULL));
             int random = rand() % 256;
             V[x] = random & value;
+            PC += 2;
             break;
         case 0xD000:
             int height = opcode & 0x000F;
@@ -165,26 +201,88 @@ void emulate_cycle() {
                     }
                 }
             }
+            PC += 2;
+            break;
         case 0xE000:
             switch(opcode & 0x00FF) {
                 case 0x009E:
+                    if(keypad[V[x]]) {
+                        PC += 2;
+                    }
+                    PC += 2;
+                    break;
                 case 0x00A1:
+                    if(!(keypad[V[x]])) {
+                        PC += 2;
+                    }
+                    PC += 2;
+                    break;
+                default:
+                    break;
             }
         case 0xF000:
             switch(opcode & 0x00FF) {
                 case 0x0007:
+                    V[x] = delay;
+                    PC += 2;
+                    break;
                 case 0x000A:
+                    int i;
+                    for(i = 0; i < 16; i++) {
+                        if(keypad[i]) {
+                            V[x] = i;
+                            PC += 2;
+                            break;
+                        }
+                    }
+                    break;
                 case 0x0015:
+                    delay = V[x];
+                    PC += 2;
+                    break;
                 case 0x0018:
+                    sound = V[x];
+                    PC += 2;
+                    break;
                 case 0x001E:
+                    I = I + V[x];
+                    PC += 2;
+                    break;
                 case 0x0029:
+                    I = V[x] * 5;
+                    PC += 2;
+                    break;
                 case 0x0033:
+                    int ones = V[x] % 10, tens = (V[x] / 10) % 10, hundreds = (V[x] / 100) % 10;
+                    memory[I] = hundreds;
+                    memory[I + 1] = tens;
+                    memory[I + 2] = ones;
+                    PC += 2;
+                    break;
                 case 0x0055:
+                    int i;
+                    for(i = 0; i <= x; i++) {
+                        memory[I + i] = V[i];
+                    }
+                    PC += 2;
+                    break;
                 case 0x0065:
+                    int i;
+                    for(i = 0; i <= x; i++) {
+                        V[i] = memory[I + i];
+                    }
+                    PC += 2;
+                    break;
                 default:
                     break;
             }
         default:
             break;
+        if(delay > 0)
+            delay -= 1;
+        if(sound > 0) {
+            sound = -1;
+            printf("BEEP");
+        }
     }
 }

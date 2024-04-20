@@ -84,6 +84,7 @@ void emulate_cycle() {
                 default:
                     break;
             }
+            break;
         case 0x1000:
             address = opcode & 0x0FFF;
             PC = address;
@@ -167,6 +168,7 @@ void emulate_cycle() {
                 default:
                     break;
             }
+            break;
         case 0x9000:
             if(V[x] != V[y]) {
                 PC += 2;
@@ -212,7 +214,7 @@ void emulate_cycle() {
                     PC += 2;
                     break;
                 case 0x00A1:
-                    if(!(keypad[V[x]])) {
+                    if(!keypad[V[x]]) {
                         PC += 2;
                     }
                     PC += 2;
@@ -220,6 +222,7 @@ void emulate_cycle() {
                 default:
                     break;
             }
+            break;
         case 0xF000:
             switch(opcode & 0x00FF) {
                 case 0x0007:
@@ -276,6 +279,7 @@ void emulate_cycle() {
                 default:
                     break;
             }
+            break;
         default:
             break;
         if(delay > 0)

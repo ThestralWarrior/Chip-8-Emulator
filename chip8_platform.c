@@ -7,7 +7,15 @@
 #define HEIGHT 32
 #define BGCOLOR 0x00000000 
 #define FGCOLOR 0xFFFF00FF
-#define SCALE 20
+#define SCALE 10
+
+typedef enum {
+    QUIT = 0,
+    RUNNING,
+    PAUSE
+} emulator_state;
+
+emulator_state state = QUIT;
 
 SDL_Window* window = NULL;
 SDL_Renderer* renderer = NULL;
@@ -17,6 +25,7 @@ void cleanup();
 void clearscreen();
 void updatescreen();
 void handleinputs();
+bool stateinit();
 
 int main(int argc, char **argv) {
     printf("%d\n", argc);
@@ -25,8 +34,9 @@ int main(int argc, char **argv) {
         fprintf(stderr, "Error while initializing.");
         exit(EXIT_FAILURE);
     }
+    if(!stateinit()) exit(EXIT_FAILURE);
     clearscreen();
-    while(true) {
+    while(state != QUIT) {
         handleinputs();
         SDL_Delay(16);
         updatescreen();
@@ -89,7 +99,27 @@ void handleinputs() {
     while(SDL_PollEvent(&event)) {
         switch(event.type) {
             case SDL_QUIT:
+                state = QUIT;
+                printf("You decided to quit...\n");
+                return;
+            case SDL_KEYDOWN:
+                switch(event.key.keysym.sym) {
+                    case SDLK_ESCAPE:
+                        state = QUIT;
+                        return;
+                    default:
+                        break;
+                }
+                break;
+            case SDL_KEYUP:
+                break;
+            default:
                 break;
         }
     }
+}
+
+bool stateinit() {
+    state = RUNNING;
+    return true;
 }

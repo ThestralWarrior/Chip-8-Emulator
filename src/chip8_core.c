@@ -3,23 +3,22 @@
 #include<sys/stat.h>
 #include<errno.h>
 #include<time.h>
+#include "chip_core.h"
 
-#define MEMORY_SIZE 4096
+extern int errno; // redundant
 
-extern int errno;
-
-uint8_t V[16] = {0};
+uint8_t V[NUM_REGISTERS] = {0};
 uint8_t memory[MEMORY_SIZE] = {0};
 uint16_t I = 0;
 uint16_t PC = 0x200;
 uint8_t SP = -1;
 uint16_t opcode = 0;
-uint16_t stack[16] = {0};
-uint8_t keypad[16] = {0};
-uint8_t display[64 * 32] = {0};
+uint16_t stack[STACK_SIZE] = {0};
+uint8_t keypad[TOTAL_KEYS] = {0};
+uint8_t display[TOTAL_PIXELS] = {0};
 uint8_t delay = 0;
 uint8_t sound = 0;
-const uint8_t fontset[80] = {
+const uint8_t fontset[NUM_FONTS] = {
     0xF0, 0x90, 0x90, 0x90, 0xF0,  // 0
     0x20, 0x60, 0x20, 0x20, 0x70,  // 1
     0xF0, 0x10, 0xF0, 0x80, 0xF0,  // 2
@@ -44,6 +43,7 @@ void init_cpu() {
     memcpy(memory, fontset, sizeof(fontset));
 }
 
+// needs some improvement
 int load_rom(char *filename) {
     FILE *fptr;
     if((fptr = fopen(filename, "rb")) == NULL) {
@@ -51,7 +51,7 @@ int load_rom(char *filename) {
         return errno;
     }
     struct stat fileinfo;
-    stat(filename, fptr);
+    stat(filename, &fileinfo);
     size_t bytes_read = fread(memory + 0x200, 1, sizeof(memory) - 0x200, fptr);
     fclose(fptr);
     if(bytes_read != fileinfo.st_size)

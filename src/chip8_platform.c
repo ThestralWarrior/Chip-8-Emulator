@@ -2,43 +2,28 @@
 #include<stdbool.h>
 #include<stdlib.h>
 #include<SDL2/SDL.h>
-
-#define WIDTH 64
-#define HEIGHT 32
-#define BGCOLOR 0x00000000 
-#define FGCOLOR 0xFFFF00FF
-#define SCALE 10
-
-typedef enum {
-    QUIT = 0,
-    RUNNING,
-    PAUSE
-} emulator_state;
+#include "chip8_platform.h"
 
 emulator_state state = QUIT;
 
 SDL_Window* window = NULL;
 SDL_Renderer* renderer = NULL;
 
-bool init();
-void cleanup();
-void clearscreen();
-void updatescreen();
-void handleinputs();
-bool stateinit();
-
 int main(int argc, char **argv) {
     printf("%d\n", argc);
     printf("%s\n", argv[0]);
     if(!init()) {
-        fprintf(stderr, "Error while initializing.");
+        fprintf(stderr, "Error while initializing.\n");
         exit(EXIT_FAILURE);
     }
     if(!stateinit()) exit(EXIT_FAILURE);
     clearscreen();
     while(state != QUIT) {
+        printf("Awaiting input\n");
         handleinputs();
-        SDL_Delay(16);
+        printf("Delay started\n");
+        SDL_Delay(2000);
+        printf("Updating screen\n");
         updatescreen();
     }
     cleanup();

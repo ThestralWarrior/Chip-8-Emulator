@@ -2,14 +2,17 @@
 TARGET = chip8
 
 # Source file(s)
-SOURCES = chip8_platform.c
+SOURCES = src/chip8_platform.c
+
+# Include path(s)
+INCLUDE_PATHS = -Iinclude
 
 # Flags for SDL2, obtained from sdl2-config
 SDL_FLAGS = $(shell sdl2-config --cflags --libs)
 
 # Compiler and flags
 CC = gcc
-CFLAGS = -Wall -Wextra
+CFLAGS = -Wall -Wextra $(INCLUDE_PATHS)
 
 # Rule to compile the project
 $(TARGET): $(SOURCES)

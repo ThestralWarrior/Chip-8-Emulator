@@ -13,6 +13,8 @@ typedef enum {
     PAUSE
 } emulator_state;
 
+extern emulator_state state;
+
 bool init();
 void cleanup();
 void clearscreen();
@@ -20,7 +22,7 @@ void updatescreen();
 void handleinputs();
 bool stateinit();
 
-void assignTestDisplayValues();
+void assignTestDisplayValues(int k);
 void printValuesInDisplayArray();
 
 #endif

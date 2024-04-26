@@ -1,9 +1,9 @@
-#include<stdio.h>
-#include<stdint.h>
-#include<sys/stat.h>
-#include<errno.h>
-#include<time.h>
-#include "chip_core.h"
+#include <stdio.h>
+#include <stdint.h>
+#include <sys/stat.h>
+#include <errno.h>
+#include <time.h>
+#include "chip8_core.h"
 
 extern int errno; // redundant
 
@@ -71,8 +71,7 @@ void emulate_cycle() {
         case 0x0000:
             switch(opcode & 0x00FF) {
                 case 0x00E0:
-                    int i;
-                    for(i = 0; i < 64 * 32; i++) {
+                    for(int i = 0; i < 64 * 32; i++) {
                         display[i] = 0;
                     }
                     PC += 2;
@@ -230,8 +229,7 @@ void emulate_cycle() {
                     PC += 2;
                     break;
                 case 0x000A:
-                    int i;
-                    for(i = 0; i < 16; i++) {
+                    for(int i = 0; i < 16; i++) {
                         if(keypad[i]) {
                             V[x] = i;
                             PC += 2;
@@ -263,15 +261,13 @@ void emulate_cycle() {
                     PC += 2;
                     break;
                 case 0x0055:
-                    int i;
-                    for(i = 0; i <= x; i++) {
+                    for(int i = 0; i <= x; i++) {
                         memory[I + i] = V[i];
                     }
                     PC += 2;
                     break;
                 case 0x0065:
-                    int i;
-                    for(i = 0; i <= x; i++) {
+                    for(int i = 0; i <= x; i++) {
                         V[i] = memory[I + i];
                     }
                     PC += 2;

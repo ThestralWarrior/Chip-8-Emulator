@@ -3,11 +3,14 @@
 #include<stdlib.h>
 #include<SDL2/SDL.h>
 #include "chip8_platform.h"
+#include "chip8_core.h"
 
 emulator_state state = QUIT;
 
 SDL_Window* window = NULL;
 SDL_Renderer* renderer = NULL;
+
+uint8_t display[TOTAL_PIXELS] = {0};
 
 int main(int argc, char **argv) {
     printf("%d\n", argc);
@@ -17,14 +20,23 @@ int main(int argc, char **argv) {
         exit(EXIT_FAILURE);
     }
     if(!stateinit()) exit(EXIT_FAILURE);
+    int i = 1;
+    printf("%d\n", i);
+    assignTestDisplayValues(i);
+    printValuesInDisplayArray();
     clearscreen();
     while(state != QUIT) {
         printf("Awaiting input\n");
         handleinputs();
         printf("Delay started\n");
-        SDL_Delay(2000);
+        // execute instruction
+        SDL_Delay(16);
         printf("Updating screen\n");
         updatescreen();
+        if(i == 1) i = 0;
+        else if(i == 0) i = 1;
+        printf("%d\n", i);
+        assignTestDisplayValues(i);
     }
     cleanup();
     return 0;
@@ -76,6 +88,37 @@ void clearscreen() {
 }
 
 void updatescreen() {
+    SDL_Rect rect;
+
+    uint8_t r_fg = (FGCOLOR >> 24) & 0xFF;
+    uint8_t g_fg = (FGCOLOR >> 16) & 0xFF;
+    uint8_t b_fg = (FGCOLOR >> 8) & 0xFF;
+    uint8_t a_fg = (FGCOLOR >> 0) & 0xFF;
+
+    uint8_t r_bg = (BGCOLOR >> 24) & 0xFF;
+    uint8_t g_bg = (BGCOLOR >> 16) & 0xFF;
+    uint8_t b_bg = (BGCOLOR >> 8) & 0xFF;
+    uint8_t a_bg = (BGCOLOR >> 0) & 0xFF;
+
+    for(int y = 0; y < 32; y++) {
+        for(int x = 0; x < 64; x++) {
+            if(display[x + (y * 64)]) {
+                rect.x = x * SCALE;
+                rect.y = y * SCALE;
+                rect.w = SCALE;
+                rect.h = SCALE;
+                SDL_SetRenderDrawColor(renderer, r_fg, g_fg, b_fg, a_fg);
+                SDL_RenderFillRect(renderer, &rect);
+            } else {
+                rect.x = x * SCALE;
+                rect.y = y * SCALE;
+                rect.w = SCALE;
+                rect.h = SCALE;
+                SDL_SetRenderDrawColor(renderer, r_bg, g_bg, b_bg, a_bg);
+                SDL_RenderFillRect(renderer, &rect);
+            }
+        }
+    }
     SDL_RenderPresent(renderer);
 }
 
@@ -107,4 +150,26 @@ void handleinputs() {
 bool stateinit() {
     state = RUNNING;
     return true;
+}
+
+void assignTestDisplayValues(int k) {
+    if(k) {
+        for(int i = 0; i < TOTAL_PIXELS; i++) {
+            if(i % 2 == 0) display[i] = 1;
+            else display[i] = 0;
+        }
+    }
+    else {
+        for(int i = 0; i < TOTAL_PIXELS; i++) {
+            if(i % 2 == 1) display[i] = 1;
+            else display[i] = 0;
+        }
+    }
+}
+
+void printValuesInDisplayArray() {
+    for(int i = 0; i < TOTAL_PIXELS; i++) {
+        printf("%d ", display[i]);
+    }
+    printf("\n");
 }

@@ -1,7 +1,7 @@
-#include<stdio.h>
-#include<stdbool.h>
-#include<stdlib.h>
-#include<SDL2/SDL.h>
+#include <stdio.h>
+#include <stdbool.h>
+#include <stdlib.h>
+#include <SDL2/SDL.h>
 #include "chip8_platform.h"
 #include "chip8_core.h"
 
@@ -10,37 +10,7 @@ emulator_state state = QUIT;
 SDL_Window* window = NULL;
 SDL_Renderer* renderer = NULL;
 
-uint8_t display[TOTAL_PIXELS] = {0};
-
-int main(int argc, char **argv) {
-    printf("%d\n", argc);
-    printf("%s\n", argv[0]);
-    if(!init()) {
-        fprintf(stderr, "Error while initializing.\n");
-        exit(EXIT_FAILURE);
-    }
-    if(!stateinit()) exit(EXIT_FAILURE);
-    int i = 1;
-    printf("%d\n", i);
-    assignTestDisplayValues(i);
-    printValuesInDisplayArray();
-    clearscreen();
-    while(state != QUIT) {
-        printf("Awaiting input\n");
-        handleinputs();
-        printf("Delay started\n");
-        // execute instruction
-        SDL_Delay(16);
-        printf("Updating screen\n");
-        updatescreen();
-        if(i == 1) i = 0;
-        else if(i == 0) i = 1;
-        printf("%d\n", i);
-        assignTestDisplayValues(i);
-    }
-    cleanup();
-    return 0;
-}
+// uint8_t display[TOTAL_PIXELS] = {0};
 
 bool init() {
     printf("Initializing SDL...\n");
@@ -152,24 +122,24 @@ bool stateinit() {
     return true;
 }
 
-void assignTestDisplayValues(int k) {
-    if(k) {
-        for(int i = 0; i < TOTAL_PIXELS; i++) {
-            if(i % 2 == 0) display[i] = 1;
-            else display[i] = 0;
-        }
-    }
-    else {
-        for(int i = 0; i < TOTAL_PIXELS; i++) {
-            if(i % 2 == 1) display[i] = 1;
-            else display[i] = 0;
-        }
-    }
-}
+// void assignTestDisplayValues(int k) {
+//     if(k) {
+//         for(int i = 0; i < TOTAL_PIXELS; i++) {
+//             if(i % 2 == 0) display[i] = 1;
+//             else display[i] = 0;
+//         }
+//     }
+//     else {
+//         for(int i = 0; i < TOTAL_PIXELS; i++) {
+//             if(i % 2 == 1) display[i] = 1;
+//             else display[i] = 0;
+//         }
+//     }
+// }
 
-void printValuesInDisplayArray() {
-    for(int i = 0; i < TOTAL_PIXELS; i++) {
-        printf("%d ", display[i]);
-    }
-    printf("\n");
-}
+// void printValuesInDisplayArray() {
+//     for(int i = 0; i < TOTAL_PIXELS; i++) {
+//         printf("%d ", display[i]);
+//     }
+//     printf("\n");
+// }

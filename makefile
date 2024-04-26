@@ -2,7 +2,7 @@
 TARGET = chip8
 
 # Source file(s)
-SOURCES = src/chip8_platform.c
+SOURCES = src/chip8_main.c src/chip8_platform.c src/chip8_core.c
 
 # Include path(s)
 INCLUDE_PATHS = -Iinclude

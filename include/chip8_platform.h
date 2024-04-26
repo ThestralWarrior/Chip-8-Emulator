@@ -20,4 +20,7 @@ void updatescreen();
 void handleinputs();
 bool stateinit();
 
+void assignTestDisplayValues();
+void printValuesInDisplayArray();
+
 #endif

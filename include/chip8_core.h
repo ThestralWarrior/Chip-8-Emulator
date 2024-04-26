@@ -1,7 +1,7 @@
 #ifndef CHIP8_CORE_H
 #define CHIP8_CORE_H
 
-#include<stdint.h>
+#include <stdint.h>
 
 #define NUM_REGISTERS 16
 #define MEMORY_SIZE 4096

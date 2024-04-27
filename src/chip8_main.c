@@ -14,14 +14,16 @@ int main(int argc, char **argv) {
     }
     if(!stateinit()) exit(EXIT_FAILURE);
     init_cpu();
+    load_rom("rom/IBM.ch8");
+    print_rom_instructions("rom/IBM.ch8");
     clearscreen();
     while(state != QUIT) {
-        printf("Awaiting input\n");
+    //    printf("Awaiting input\n");
         handleinputs();
-        printf("Delay started\n");
-        // execute instructions
+    //    printf("Delay started\n");
+        emulate_cycle();
         SDL_Delay(16);
-        printf("Updating screen\n");
+    //    printf("Updating screen\n");
         updatescreen();
     }
     cleanup();

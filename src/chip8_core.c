@@ -3,9 +3,8 @@
 #include <sys/stat.h>
 #include <errno.h>
 #include <time.h>
+#include <string.h>
 #include "chip8_core.h"
-
-extern int errno; // redundant
 
 uint8_t V[NUM_REGISTERS] = {0};
 uint8_t memory[MEMORY_SIZE] = {0};
@@ -56,6 +55,7 @@ int load_rom(char *filename) {
     fclose(fptr);
     if(bytes_read != fileinfo.st_size)
         return -1;
+    printf("Bytes read: %ld\n", bytes_read);
     return 0;
 }
 
@@ -71,117 +71,148 @@ void emulate_cycle() {
         case 0x0000:
             switch(opcode & 0x00FF) {
                 case 0x00E0:
+                    printf("00E0: 0x%04X (Valid).\n", opcode);
                     for(int i = 0; i < 64 * 32; i++) {
                         display[i] = 0;
                     }
                     PC += 2;
                     break;
                 case 0x00EE:
+                    printf("00EE: 0x%04X (Valid).\n", opcode);
                     PC = stack[SP--];
                     PC += 2;
                     break;
                 default:
+                    printf("0x%04X (Invalid).\n", opcode);
                     break;
             }
             break;
         case 0x1000:
+            printf("1NNN: 0x%04X (Valid).\n", opcode);
             address = opcode & 0x0FFF;
             PC = address;
             break;
         case 0x2000:
+            printf("2NNN: 0x%04X (Valid).\n", opcode);
             address = opcode & 0x0FFF;
             stack[++SP] = PC;
             PC = address;
             break;
         case 0x3000:
+            printf("3XNN: 0x%04X (Valid).\n", opcode);
             value = opcode & 0x00FF; 
             if(V[x] == value) {
                 PC += 2;
             }
+            PC += 2;
             break;
         case 0x4000:
+            printf("4XNN: 0x%04X (Valid).\n", opcode);
             value = opcode & 0x00FF;
             if(V[x] != value) {
                 PC += 2;
             }
+            PC += 2;
             break;
         case 0x5000:
+            printf("5XY0: 0x%04X (Valid).\n", opcode);
             if(V[x] == V[y]) {
                 PC += 2;
             }
+            PC += 2;
             break;
         case 0x6000:
+            printf("6XNN: 0x%04X (Valid).\n", opcode);
             value = opcode & 0x00FF;
             V[x] = value;
+            PC += 2;
             break;
         case 0x7000:
+            printf("7XNN: 0x%04X (Valid).\n", opcode);
             value = opcode & 0x00FF;
             V[x] = V[x] + value;
+            PC += 2;
             break;
         case 0x8000:
             switch(opcode & 0x000F) {
                 case 0x0000:
+                    printf("8XY0: 0x%04X (Valid).\n", opcode);
                     V[x] = V[y];
                     PC += 2;
                     break;
                 case 0x0001:
+                    printf("8XY1: 0x%04X (Valid).\n", opcode);
                     V[x] = V[x] | V[y];
                     PC += 2;
                     break;
                 case 0x0002:
+                    printf("8XY2: 0x%04X (Valid).\n", opcode);
                     V[x] = V[x] & V[y];
                     PC += 2;
                     break;
                 case 0x0003:
+                    printf("8XY3: 0x%04X (Valid).\n", opcode);
                     V[x] = V[x] ^ V[y];
                     PC += 2;
                     break;
                 case 0x0004:
+                    printf("8XY4: 0x%04X (Valid).\n", opcode);
                     int sum = V[x] + V[y];
                     if(sum > 255) V[0xF] = 1;
                     V[x] = sum % 256;
                     PC += 2;
                     break;
                 case 0x0005:
+                    printf("8XY5: 0x%04X (Valid).\n", opcode);
                     if(V[x] > V[y]) V[0xF] = 1;
                     else V[0xF] = 0;
                     V[x] = V[x] - V[y];
                     PC += 2;
                     break;
                 case 0x0006:
+                    printf("8XY6: 0x%04X (Valid).\n", opcode);
                     V[0xF] = opcode & 0x1;
                     V[x] /= 2;
                     PC += 2;
                     break;
                 case 0x0007:
+                    printf("8XY7: 0x%04X (Valid).\n", opcode);
                     if(V[y] > V[x]) V[0xF] = 1;
                     else V[0xF] = 0;
                     V[x] = V[y] - V[x];
                     PC += 2;
                     break;
                 case 0x000E:
+                    printf("8XYE: 0x%04X (Valid).\n", opcode);
                     V[0xF] = (opcode & 0x80) >> 7;
                     V[x] *= 2;
                     PC += 2;
                     break;
                 default:
+                    printf("0x%04X (Invalid).\n", opcode);
                     break;
             }
             break;
         case 0x9000:
+            printf("9XY0: 0x%04X (Valid).\n", opcode);
             if(V[x] != V[y]) {
                 PC += 2;
             }
+            PC += 2;
             break;
         case 0xA000:
+            printf("ANNN: 0x%04X (Valid).\n", opcode);
             address = opcode & 0x0FFF;
             I = address;
+            PC += 2;
             break;
         case 0xB000:
+            printf("BNNN: 0x%04X (Valid).\n", opcode);
             address = opcode & 0x0FFF;
             PC = address + V[0];
             break;
         case 0xC000:
+            printf("CXNN: 0x%04X (Valid).\n", opcode);
             value = opcode & 0x00FF;
             srand(time(NULL));
             int random = rand() % 256;
@@ -189,6 +220,7 @@ void emulate_cycle() {
             PC += 2;
             break;
         case 0xD000:
+            printf("DXYN: 0x%04X (Valid).\n", opcode);
             int height = opcode & 0x000F;
             int row, column;
             for(row = 0; row < height; row++) {
@@ -207,28 +239,33 @@ void emulate_cycle() {
         case 0xE000:
             switch(opcode & 0x00FF) {
                 case 0x009E:
+                    printf("EX9E: 0x%04X (Valid).\n", opcode);
                     if(keypad[V[x]]) {
                         PC += 2;
                     }
                     PC += 2;
                     break;
                 case 0x00A1:
+                    printf("EXA1: 0x%04X (Valid).\n", opcode);
                     if(!keypad[V[x]]) {
                         PC += 2;
                     }
                     PC += 2;
                     break;
                 default:
+                    printf("0x%04X (Invalid).\n", opcode);
                     break;
             }
             break;
         case 0xF000:
             switch(opcode & 0x00FF) {
                 case 0x0007:
+                    printf("FX07: 0x%04X (Valid).\n", opcode);
                     V[x] = delay;
                     PC += 2;
                     break;
                 case 0x000A:
+                    printf("FX0A: 0x%04X (Valid).\n", opcode);
                     for(int i = 0; i < 16; i++) {
                         if(keypad[i]) {
                             V[x] = i;
@@ -238,22 +275,27 @@ void emulate_cycle() {
                     }
                     break;
                 case 0x0015:
+                    printf("FX15: 0x%04X (Valid).\n", opcode);
                     delay = V[x];
                     PC += 2;
                     break;
                 case 0x0018:
+                    printf("FX18: 0x%04X (Valid).\n", opcode);
                     sound = V[x];
                     PC += 2;
                     break;
                 case 0x001E:
+                    printf("FX1E: 0x%04X (Valid).\n", opcode);
                     I = I + V[x];
                     PC += 2;
                     break;
                 case 0x0029:
+                    printf("FX29: 0x%04X (Valid).\n", opcode);
                     I = V[x] * 5;
                     PC += 2;
                     break;
                 case 0x0033:
+                    printf("FX33: 0x%04X (Valid).\n", opcode);
                     int ones = V[x] % 10, tens = (V[x] / 10) % 10, hundreds = (V[x] / 100) % 10;
                     memory[I] = hundreds;
                     memory[I + 1] = tens;
@@ -261,22 +303,26 @@ void emulate_cycle() {
                     PC += 2;
                     break;
                 case 0x0055:
+                    printf("FX55: 0x%04X (Valid).\n", opcode);
                     for(int i = 0; i <= x; i++) {
                         memory[I + i] = V[i];
                     }
                     PC += 2;
                     break;
                 case 0x0065:
+                    printf("FX65: 0x%04X (Valid).\n", opcode);
                     for(int i = 0; i <= x; i++) {
                         V[i] = memory[I + i];
                     }
                     PC += 2;
                     break;
                 default:
+                    printf("0x%04X (Invalid).\n", opcode);
                     break;
             }
             break;
         default:
+            printf("0x%04X (Invalid).\n", opcode);
             break;
         if(delay > 0)
             delay -= 1;
@@ -285,4 +331,19 @@ void emulate_cycle() {
             printf("BEEP");
         }
     }
+}
+
+void print_rom_instructions(char *filename) {
+    FILE *fptr = NULL;
+    if((fptr = fopen(filename, "rb")) == NULL) {
+        printf("Couldn't load rom file.");
+        return;
+    }
+    uint16_t op;
+    printf("Instruction in %s: ", filename);
+    while(fread(&op, sizeof(uint16_t), 1, fptr) == 1) {
+        op = ((op & 0xFF) << 8) | ((op & 0xFF00) >> 8);
+        printf("0x%04X ", op);
+    }
+    printf("\n");
 }

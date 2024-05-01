@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdint.h>
+#include <stdlib.h>
 #include <sys/stat.h>
 #include <errno.h>
 #include <time.h>
@@ -35,36 +36,34 @@ const uint8_t fontset[NUM_FONTS] = {
     0xF0, 0x80, 0xF0, 0x80, 0xF0,  // E
     0xF0, 0x80, 0xF0, 0x80, 0x80   // F
 };
-uint8_t drawFlag = 0;
-uint8_t soundFlag = 0;
 
-void init_cpu() {
+void initializeCPU() {
+    srand((unsigned int)time(NULL));
     memcpy(memory, fontset, sizeof(fontset));
 }
 
 // needs some improvement
-int load_rom(char *filename) {
+int loadROM(char *filename) {
     FILE *fptr;
     if((fptr = fopen(filename, "rb")) == NULL) {
-        printf("Error while loading rom file");
+        printf("Error while loading rom file.\n");
         return errno;
     }
     struct stat fileinfo;
     stat(filename, &fileinfo);
     size_t bytes_read = fread(memory + 0x200, 1, sizeof(memory) - 0x200, fptr);
     fclose(fptr);
-    if(bytes_read != fileinfo.st_size)
+    size_t expected_size = (size_t)(fileinfo.st_size);
+    if(bytes_read != expected_size)
         return -1;
     printf("Bytes read: %ld\n", bytes_read);
     return 0;
 }
 
-void emulate_cycle() {
-    drawFlag = 0;
-    soundFlag = 0;
+void executeInstruction() {
     opcode = memory[PC] << 8 | memory[PC + 1];
-    uint16_t address = 0;
-    uint8_t value = 0;
+    uint16_t address = opcode & 0x0FFF;
+    uint8_t value = opcode & 0x00FF;
     uint8_t x = (opcode & 0x0F00) >> 8;
     uint8_t y = (opcode & 0x00F0) >> 4;
     switch(opcode & 0xF000) {
@@ -79,7 +78,8 @@ void emulate_cycle() {
                     break;
                 case 0x00EE:
                     printf("00EE: 0x%04X (Valid).\n", opcode);
-                    PC = stack[SP--];
+                    PC = stack[SP];
+                    SP--;
                     PC += 2;
                     break;
                 default:
@@ -89,18 +89,16 @@ void emulate_cycle() {
             break;
         case 0x1000:
             printf("1NNN: 0x%04X (Valid).\n", opcode);
-            address = opcode & 0x0FFF;
             PC = address;
             break;
         case 0x2000:
             printf("2NNN: 0x%04X (Valid).\n", opcode);
-            address = opcode & 0x0FFF;
-            stack[++SP] = PC;
+            SP++;
+            stack[SP] = PC;
             PC = address;
             break;
         case 0x3000:
             printf("3XNN: 0x%04X (Valid).\n", opcode);
-            value = opcode & 0x00FF; 
             if(V[x] == value) {
                 PC += 2;
             }
@@ -108,7 +106,6 @@ void emulate_cycle() {
             break;
         case 0x4000:
             printf("4XNN: 0x%04X (Valid).\n", opcode);
-            value = opcode & 0x00FF;
             if(V[x] != value) {
                 PC += 2;
             }
@@ -123,13 +120,11 @@ void emulate_cycle() {
             break;
         case 0x6000:
             printf("6XNN: 0x%04X (Valid).\n", opcode);
-            value = opcode & 0x00FF;
             V[x] = value;
             PC += 2;
             break;
         case 0x7000:
             printf("7XNN: 0x%04X (Valid).\n", opcode);
-            value = opcode & 0x00FF;
             V[x] = V[x] + value;
             PC += 2;
             break;
@@ -158,34 +153,37 @@ void emulate_cycle() {
                 case 0x0004:
                     printf("8XY4: 0x%04X (Valid).\n", opcode);
                     int sum = V[x] + V[y];
-                    if(sum > 255) V[0xF] = 1;
                     V[x] = sum % 256;
+                    if(sum > 255) V[0xF] = 1;
+                    else V[0xF] = 0;
                     PC += 2;
                     break;
                 case 0x0005:
-                    printf("8XY5: 0x%04X (Valid).\n", opcode);
+                    printf("8XY5: 0x%04X (Valid).\n", opcode); 
+                    V[x] -= V[y];
                     if(V[x] > V[y]) V[0xF] = 1;
                     else V[0xF] = 0;
-                    V[x] = V[x] - V[y];
                     PC += 2;
                     break;
                 case 0x0006:
                     printf("8XY6: 0x%04X (Valid).\n", opcode);
-                    V[0xF] = opcode & 0x1;
-                    V[x] /= 2;
+                    
+                    V[x] = V[x] >> 1;
+                    V[0xF] = V[x] & 0x1;
                     PC += 2;
                     break;
                 case 0x0007:
                     printf("8XY7: 0x%04X (Valid).\n", opcode);
+                    V[x] = V[y] - V[x];
                     if(V[y] > V[x]) V[0xF] = 1;
                     else V[0xF] = 0;
-                    V[x] = V[y] - V[x];
                     PC += 2;
                     break;
                 case 0x000E:
                     printf("8XYE: 0x%04X (Valid).\n", opcode);
-                    V[0xF] = (opcode & 0x80) >> 7;
-                    V[x] *= 2;
+                    
+                    V[x] = V[x] << 1;
+                    V[0xF] = (V[x] & 0x80) >> 7;
                     PC += 2;
                     break;
                 default:
@@ -202,38 +200,39 @@ void emulate_cycle() {
             break;
         case 0xA000:
             printf("ANNN: 0x%04X (Valid).\n", opcode);
-            address = opcode & 0x0FFF;
             I = address;
             PC += 2;
             break;
         case 0xB000:
             printf("BNNN: 0x%04X (Valid).\n", opcode);
-            address = opcode & 0x0FFF;
             PC = address + V[0];
             break;
         case 0xC000:
             printf("CXNN: 0x%04X (Valid).\n", opcode);
-            value = opcode & 0x00FF;
-            srand(time(NULL));
             int random = rand() % 256;
             V[x] = random & value;
             PC += 2;
             break;
         case 0xD000:
             printf("DXYN: 0x%04X (Valid).\n", opcode);
-            int height = opcode & 0x000F;
-            int row, column;
-            for(row = 0; row < height; row++) {
-                int pixel = memory[I + row];
-                for(column = 0; column < 8; column++) {
-                    if((pixel & (0x80 >> column)) != 0) {
-                        if(display[V[x] + column + ((V[y] + row) * 64)] == 1) {
+            uint16_t height = opcode & 0x000F;
+            uint16_t pixel;
+
+            V[0xF] = 0;
+
+            for (int row = 0; row < height; row++) {
+                pixel = memory[I + row];
+                for (int column = 0; column < 8; column++) {
+                    if ((pixel & (0x80 >> column)) != 0) {
+                        if (display[(V[x] + column + ((V[y] + row) * 64))] ==
+                            1) {
                             V[0xF] = 1;
                         }
                         display[V[x] + column + ((V[y] + row) * 64)] ^= 1;
                     }
                 }
             }
+
             PC += 2;
             break;
         case 0xE000:
@@ -327,16 +326,16 @@ void emulate_cycle() {
         if(delay > 0)
             delay -= 1;
         if(sound > 0) {
-            sound = -1;
-            printf("BEEP");
+            sound -= 1;
+            printf("beep");
         }
     }
 }
 
-void print_rom_instructions(char *filename) {
+void printInstructions(char *filename) {
     FILE *fptr = NULL;
     if((fptr = fopen(filename, "rb")) == NULL) {
-        printf("Couldn't load rom file.");
+        printf("Couldn't load rom file.\n");
         return;
     }
     uint16_t op;

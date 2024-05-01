@@ -25,9 +25,9 @@ extern const uint8_t fontset[NUM_FONTS];
 extern uint8_t drawFlag;
 extern uint8_t soundFlag;
 
-void init_cpu();
-int load_rom(char *filename);
-void emulate_cycle();
-void print_rom_instructions(char *filename);
+void initializeCPU();
+int loadROM(char *filename);
+void executeInstruction();
+void printInstructions(char *filename);
 
 #endif

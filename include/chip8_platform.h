@@ -10,7 +10,7 @@
 typedef enum {
     QUIT = 0,
     RUNNING,
-    PAUSE
+    PAUSED
 } emulator_state;
 
 extern emulator_state state;
@@ -21,8 +21,6 @@ void clearscreen();
 void updatescreen();
 void handleinputs();
 bool stateinit();
-
-void assignTestDisplayValues(int k);
-void printValuesInDisplayArray();
+void beepsound();
 
 #endif

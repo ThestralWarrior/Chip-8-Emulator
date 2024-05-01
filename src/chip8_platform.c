@@ -10,21 +10,22 @@ emulator_state state = QUIT;
 SDL_Window* window = NULL;
 SDL_Renderer* renderer = NULL;
 
-// uint8_t display[TOTAL_PIXELS] = {0};
+// SDL_Scancode keymappings[16] = {
+//     SDL_SCANCODE_1, SDL_SCANCODE_2, SDL_SCANCODE_3, SDL_SCANCODE_4,
+//     SDL_SCANCODE_Q, SDL_SCANCODE_W, SDL_SCANCODE_E, SDL_SCANCODE_R,
+//     SDL_SCANCODE_A, SDL_SCANCODE_S, SDL_SCANCODE_D, SDL_SCANCODE_F,
+//     SDL_SCANCODE_Z, SDL_SCANCODE_X, SDL_SCANCODE_C, SDL_SCANCODE_V};
 
 bool init() {
-    printf("Initializing SDL...\n");
     if(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_TIMER) != 0) {
         SDL_Log("Error while initializing: %s\n", SDL_GetError());
         return false;
     }
-    printf("Creating Window...\n");
     window = SDL_CreateWindow("CHIP-8 Emulator", SDL_WINDOWPOS_CENTERED ,  SDL_WINDOWPOS_CENTERED, WIDTH * SCALE, HEIGHT * SCALE, 0);
     if(window == NULL) {
         SDL_Log("Window not initialized: %s\n", SDL_GetError());
         return false;
     }
-    printf("Creating Renderer...\n");
     renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
     if(renderer == NULL) {
         SDL_Log("Renderer not initialized: %s\n", SDL_GetError());
@@ -34,17 +35,14 @@ bool init() {
 }
 
 void cleanup() {
-    printf("Destroying Renderer...\n");
     if(renderer) {
         SDL_DestroyRenderer(renderer);
         renderer = NULL;
     }
-    printf("Destroying Window...\n");
     if(window) {
         SDL_DestroyWindow(window);
         window = NULL;
     }
-    printf("Quitting all SDL subsystems...\n");
     SDL_Quit();
 }
 
@@ -94,7 +92,8 @@ void updatescreen() {
 
 void handleinputs() {
     SDL_Event event;
-    while(SDL_PollEvent(&event)) {
+    if(SDL_PollEvent(&event)) {
+        // const Uint8* keyboardState = SDL_GetKeyboardState(NULL);
         switch(event.type) {
             case SDL_QUIT:
                 state = QUIT;
@@ -105,11 +104,139 @@ void handleinputs() {
                     case SDLK_ESCAPE:
                         state = QUIT;
                         return;
+                    case SDLK_SPACE:
+                        if(state == RUNNING) {
+                            state = PAUSED;
+                            printf("PAUSED\n");
+                        } else {
+                            state = RUNNING;
+                            printf("RESUMED\n");
+                        }
+                        break;
+                    case SDLK_v:
+                        keypad[0xF] = 1;
+                        printf("F\n");
+                        break;
+                    case SDLK_f:
+                        keypad[0xE] = 1;
+                        printf("E\n");
+                        break;
+                    case SDLK_r:
+                        keypad[0xD] = 1;
+                        printf("D\n");
+                        break;
+                    case SDLK_4:
+                        keypad[0xC] = 1;
+                        printf("C\n");
+                        break;
+                    case SDLK_c:
+                        keypad[0xB] = 1;
+                        printf("B\n");
+                        break;
+                    case SDLK_z:
+                        keypad[0xA] = 1;
+                        printf("A\n");
+                        break;
+                    case SDLK_d:
+                        keypad[0x9] = 1;
+                        printf("9\n");
+                        break;
+                    case SDLK_s:
+                        keypad[0x8] = 1;
+                        printf("8\n");
+                        break;
+                    case SDLK_a:
+                        keypad[0x7] = 1;
+                        printf("7\n");
+                        break;
+                    case SDLK_e:
+                        keypad[0x6] = 1;
+                        printf("6\n");
+                        break;
+                    case SDLK_w:
+                        keypad[0x5] = 1;
+                        printf("5\n");
+                        break;
+                    case SDLK_q:
+                        keypad[0x4] = 1;
+                        printf("4\n");
+                        break;
+                    case SDLK_3:
+                        keypad[0x3] = 1;
+                        printf("3\n");
+                        break;
+                    case SDLK_2:
+                        keypad[0x2] = 1;
+                        printf("2\n");
+                        break;
+                    case SDLK_1:
+                        keypad[0x1] = 1;
+                        printf("1\n");
+                        break;
+                    case SDLK_x:
+                        keypad[0x0] = 1;
+                        printf("0\n");
+                        break;
                     default:
+                        // for (int keycode = 0; keycode < 16; keycode++) {
+                        //     keypad[keycode] = keyboardState[keymappings[keycode]];
+                        // }
                         break;
                 }
                 break;
             case SDL_KEYUP:
+                switch(event.key.keysym.sym) {
+                    case SDLK_v:
+                        keypad[0xF] = 0;
+                        break;
+                    case SDLK_f:
+                        keypad[0xE] = 0;
+                        break;
+                    case SDLK_r:
+                        keypad[0xD] = 0;
+                        break;
+                    case SDLK_4:
+                        keypad[0xC] = 0;
+                        break;
+                    case SDLK_c:
+                        keypad[0xB] = 0;
+                        break;
+                    case SDLK_z:
+                        keypad[0xA] = 0;
+                        break;
+                    case SDLK_d:
+                        keypad[0x9] = 0;
+                        break;
+                    case SDLK_s:
+                        keypad[0x8] = 0;
+                        break;
+                    case SDLK_a:
+                        keypad[0x7] = 0;
+                        break;
+                    case SDLK_e:
+                        keypad[0x6] = 0;
+                        break;
+                    case SDLK_w:
+                        keypad[0x5] = 0;
+                        break;
+                    case SDLK_q:
+                        keypad[0x4] = 0;
+                        break;
+                    case SDLK_3:
+                        keypad[0x3] = 0;
+                        break;
+                    case SDLK_2:
+                        keypad[0x2] = 0;
+                        break;
+                    case SDLK_1:
+                        keypad[0x1] = 0;
+                        break;
+                    case SDLK_x:
+                        keypad[0x0] = 0;
+                        break;
+                    default:
+                        break;
+                }
                 break;
             default:
                 break;
@@ -122,24 +249,6 @@ bool stateinit() {
     return true;
 }
 
-// void assignTestDisplayValues(int k) {
-//     if(k) {
-//         for(int i = 0; i < TOTAL_PIXELS; i++) {
-//             if(i % 2 == 0) display[i] = 1;
-//             else display[i] = 0;
-//         }
-//     }
-//     else {
-//         for(int i = 0; i < TOTAL_PIXELS; i++) {
-//             if(i % 2 == 1) display[i] = 1;
-//             else display[i] = 0;
-//         }
-//     }
-// }
-
-// void printValuesInDisplayArray() {
-//     for(int i = 0; i < TOTAL_PIXELS; i++) {
-//         printf("%d ", display[i]);
-//     }
-//     printf("\n");
-// }
+void beepsound() {
+    printf("BEEP\n");
+}

@@ -25,7 +25,7 @@ int main(int argc, char **argv) {
     strcat(rom, file);
     printf("%s\n", rom);
     if(!init()) {
-        fprintf(stderr, "Error while initializing.\n");
+        fprintf(stderr, "Error while initializing. \u2717\n");
         exit(EXIT_FAILURE);
     }
     if(!stateinit()) exit(EXIT_FAILURE);

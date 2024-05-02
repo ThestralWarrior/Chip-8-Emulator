@@ -55,7 +55,6 @@ operation operations[16] = {
 void initializeCPU() {
     setlocale(LC_ALL, "");
     printf("CHIP-8 Emulator\n");
-    printf("Version: 4.1\n");
     printf("Build Date: %s at %s\n", __DATE__, __TIME__);
 #ifdef __GNUC__
     printf("GCC Compiler Version: %d.%d.%d\n", __GNUC__, __GNUC_MINOR__, __GNUC_PATCHLEVEL__);

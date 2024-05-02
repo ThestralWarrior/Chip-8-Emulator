@@ -20,17 +20,17 @@ SDL_Scancode keymappings[16] = {
 
 bool init() {
     if(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_TIMER) != 0) {
-        SDL_Log("Error while initializing: %s\n", SDL_GetError());
+        SDL_Log("Error while initializing: %s \u2717\n", SDL_GetError());
         return false;
     }
     window = SDL_CreateWindow("CHIP-8 Emulator", SDL_WINDOWPOS_CENTERED ,  SDL_WINDOWPOS_CENTERED, WIDTH * SCALE, HEIGHT * SCALE, 0);
     if(window == NULL) {
-        SDL_Log("Window not initialized: %s\n", SDL_GetError());
+        SDL_Log("Window not initialized: %s \u2717\n", SDL_GetError());
         return false;
     }
     renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
     if(renderer == NULL) {
-        SDL_Log("Renderer not initialized: %s\n", SDL_GetError());
+        SDL_Log("Renderer not initialized: %s \u2717\n", SDL_GetError());
         return false;
     }
     beepSpec.freq = 44100;
@@ -41,7 +41,7 @@ bool init() {
     
     beepDevice = SDL_OpenAudioDevice(NULL, 0, &beepSpec, NULL, 0);
     if (beepDevice == 0) {
-        printf("Failed to open audio: %s\n", SDL_GetError());
+        printf("Failed to open audio: %s \u2717\n", SDL_GetError());
         return;
     }
 

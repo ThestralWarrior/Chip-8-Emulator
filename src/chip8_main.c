@@ -14,7 +14,7 @@ int main(int argc, char **argv) {
     printf("%s\n", argv[0]);
     char rom[100] = "roms/";
     char *file;
-    if(argc != 2) {
+    if(argc <2 2) {
         printf("Not enough arguments. Passing IBM.ch8 as program.\n");
         file = "IBM.ch8";
     } else {

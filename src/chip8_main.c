@@ -12,7 +12,7 @@ struct timeval start_time, end_time;
 int main(int argc, char **argv) {
     printf("%d\n", argc);
     printf("%s\n", argv[0]);
-    char rom[100] = "roms/test-suite/";
+    char rom[100] = "roms/";
     char *file;
     if(argc != 2) {
         printf("Not enough arguments. Passing IBM.ch8 as program.\n");

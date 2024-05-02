@@ -9,12 +9,14 @@ emulator_state state = QUIT;
 
 SDL_Window* window = NULL;
 SDL_Renderer* renderer = NULL;
+SDL_AudioSpec beepSpec;
+SDL_AudioDeviceID beepDevice;
 
-// SDL_Scancode keymappings[16] = {
-//     SDL_SCANCODE_1, SDL_SCANCODE_2, SDL_SCANCODE_3, SDL_SCANCODE_4,
-//     SDL_SCANCODE_Q, SDL_SCANCODE_W, SDL_SCANCODE_E, SDL_SCANCODE_R,
-//     SDL_SCANCODE_A, SDL_SCANCODE_S, SDL_SCANCODE_D, SDL_SCANCODE_F,
-//     SDL_SCANCODE_Z, SDL_SCANCODE_X, SDL_SCANCODE_C, SDL_SCANCODE_V};
+SDL_Scancode keymappings[16] = {
+    SDL_SCANCODE_1, SDL_SCANCODE_2, SDL_SCANCODE_3, SDL_SCANCODE_4,
+    SDL_SCANCODE_Q, SDL_SCANCODE_W, SDL_SCANCODE_E, SDL_SCANCODE_R,
+    SDL_SCANCODE_A, SDL_SCANCODE_S, SDL_SCANCODE_D, SDL_SCANCODE_F,
+    SDL_SCANCODE_Z, SDL_SCANCODE_X, SDL_SCANCODE_C, SDL_SCANCODE_V};
 
 bool init() {
     if(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_TIMER) != 0) {
@@ -31,6 +33,18 @@ bool init() {
         SDL_Log("Renderer not initialized: %s\n", SDL_GetError());
         return false;
     }
+    beepSpec.freq = 44100;
+    beepSpec.format = AUDIO_U8;
+    beepSpec.channels = 1;
+    beepSpec.samples = 4096;
+    beepSpec.callback = NULL;
+    
+    beepDevice = SDL_OpenAudioDevice(NULL, 0, &beepSpec, NULL, 0);
+    if (beepDevice == 0) {
+        printf("Failed to open audio: %s\n", SDL_GetError());
+        return;
+    }
+
     return true;
 }
 
@@ -93,7 +107,7 @@ void updatescreen() {
 void handleinputs() {
     SDL_Event event;
     if(SDL_PollEvent(&event)) {
-        // const Uint8* keyboardState = SDL_GetKeyboardState(NULL);
+        const Uint8* keyboardState = SDL_GetKeyboardState(NULL);
         switch(event.type) {
             case SDL_QUIT:
                 state = QUIT;
@@ -113,130 +127,14 @@ void handleinputs() {
                             printf("RESUMED\n");
                         }
                         break;
-                    case SDLK_v:
-                        keypad[0xF] = 1;
-                        printf("F\n");
-                        break;
-                    case SDLK_f:
-                        keypad[0xE] = 1;
-                        printf("E\n");
-                        break;
-                    case SDLK_r:
-                        keypad[0xD] = 1;
-                        printf("D\n");
-                        break;
-                    case SDLK_4:
-                        keypad[0xC] = 1;
-                        printf("C\n");
-                        break;
-                    case SDLK_c:
-                        keypad[0xB] = 1;
-                        printf("B\n");
-                        break;
-                    case SDLK_z:
-                        keypad[0xA] = 1;
-                        printf("A\n");
-                        break;
-                    case SDLK_d:
-                        keypad[0x9] = 1;
-                        printf("9\n");
-                        break;
-                    case SDLK_s:
-                        keypad[0x8] = 1;
-                        printf("8\n");
-                        break;
-                    case SDLK_a:
-                        keypad[0x7] = 1;
-                        printf("7\n");
-                        break;
-                    case SDLK_e:
-                        keypad[0x6] = 1;
-                        printf("6\n");
-                        break;
-                    case SDLK_w:
-                        keypad[0x5] = 1;
-                        printf("5\n");
-                        break;
-                    case SDLK_q:
-                        keypad[0x4] = 1;
-                        printf("4\n");
-                        break;
-                    case SDLK_3:
-                        keypad[0x3] = 1;
-                        printf("3\n");
-                        break;
-                    case SDLK_2:
-                        keypad[0x2] = 1;
-                        printf("2\n");
-                        break;
-                    case SDLK_1:
-                        keypad[0x1] = 1;
-                        printf("1\n");
-                        break;
-                    case SDLK_x:
-                        keypad[0x0] = 1;
-                        printf("0\n");
-                        break;
                     default:
-                        // for (int keycode = 0; keycode < 16; keycode++) {
-                        //     keypad[keycode] = keyboardState[keymappings[keycode]];
-                        // }
+                        for (int keycode = 0; keycode < 16; keycode++) {
+                            keypad[keycode] = keyboardState[keymappings[keycode]];
+                        }
                         break;
                 }
                 break;
             case SDL_KEYUP:
-                switch(event.key.keysym.sym) {
-                    case SDLK_v:
-                        keypad[0xF] = 0;
-                        break;
-                    case SDLK_f:
-                        keypad[0xE] = 0;
-                        break;
-                    case SDLK_r:
-                        keypad[0xD] = 0;
-                        break;
-                    case SDLK_4:
-                        keypad[0xC] = 0;
-                        break;
-                    case SDLK_c:
-                        keypad[0xB] = 0;
-                        break;
-                    case SDLK_z:
-                        keypad[0xA] = 0;
-                        break;
-                    case SDLK_d:
-                        keypad[0x9] = 0;
-                        break;
-                    case SDLK_s:
-                        keypad[0x8] = 0;
-                        break;
-                    case SDLK_a:
-                        keypad[0x7] = 0;
-                        break;
-                    case SDLK_e:
-                        keypad[0x6] = 0;
-                        break;
-                    case SDLK_w:
-                        keypad[0x5] = 0;
-                        break;
-                    case SDLK_q:
-                        keypad[0x4] = 0;
-                        break;
-                    case SDLK_3:
-                        keypad[0x3] = 0;
-                        break;
-                    case SDLK_2:
-                        keypad[0x2] = 0;
-                        break;
-                    case SDLK_1:
-                        keypad[0x1] = 0;
-                        break;
-                    case SDLK_x:
-                        keypad[0x0] = 0;
-                        break;
-                    default:
-                        break;
-                }
                 break;
             default:
                 break;
@@ -251,4 +149,8 @@ bool stateinit() {
 
 void beepsound() {
     printf("BEEP\n");
+    uint8_t beepDuration = 255;
+    SDL_QueueAudio(beepDevice, (uint8_t*)"\xFF", 1);
+    SDL_PauseAudioDevice(beepDevice, 0);
+    SDL_Delay(beepDuration);
 }

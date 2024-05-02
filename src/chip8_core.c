@@ -66,6 +66,7 @@ void executeInstruction() {
     uint8_t value = opcode & 0x00FF;
     uint8_t x = (opcode & 0x0F00) >> 8;
     uint8_t y = (opcode & 0x00F0) >> 4;
+    uint8_t flag = 0;
     switch(opcode & 0xF000) {
         case 0x0000:
             switch(opcode & 0x00FF) {
@@ -160,30 +161,32 @@ void executeInstruction() {
                     break;
                 case 0x0005:
                     printf("8XY5: 0x%04X (Valid).\n", opcode); 
-                    V[x] -= V[y];
-                    if(V[x] > V[y]) V[0xF] = 1;
-                    else V[0xF] = 0;
+                    if(V[x] >= V[y]) flag = 1;
+                    else flag = 0;
+                    V[x] = V[x] - V[y];
+                    V[0xF] = flag;
                     PC += 2;
                     break;
                 case 0x0006:
                     printf("8XY6: 0x%04X (Valid).\n", opcode);
-                    
+                    flag = V[x] & 0x1;
                     V[x] = V[x] >> 1;
-                    V[0xF] = V[x] & 0x1;
+                    V[0xF] = flag;
                     PC += 2;
                     break;
                 case 0x0007:
                     printf("8XY7: 0x%04X (Valid).\n", opcode);
+                    if(V[y] >= V[x]) flag = 1;
+                    else flag = 0;
                     V[x] = V[y] - V[x];
-                    if(V[y] > V[x]) V[0xF] = 1;
-                    else V[0xF] = 0;
+                    V[0xF] = flag;
                     PC += 2;
                     break;
                 case 0x000E:
                     printf("8XYE: 0x%04X (Valid).\n", opcode);
-                    
+                    flag = (V[x] & 0x80) >> 7;
                     V[x] = V[x] << 1;
-                    V[0xF] = (V[x] & 0x80) >> 7;
+                    V[0xF] = flag;
                     PC += 2;
                     break;
                 default:
@@ -240,6 +243,7 @@ void executeInstruction() {
                 case 0x009E:
                     printf("EX9E: 0x%04X (Valid).\n", opcode);
                     if(keypad[V[x]]) {
+                        printf("The key %x was pressed. Skipping the next instruction.\n", V[x]);
                         PC += 2;
                     }
                     PC += 2;

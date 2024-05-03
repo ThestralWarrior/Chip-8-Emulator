@@ -35,12 +35,13 @@ For Linux only
 
 # Resources
 Website references:
-* http://devernay.free.fr/hacks/chip8/C8TECH10.HTM
+* http://devernay.free.fr/hacks/chip8/C8TECH10.HTM (Outdated and Inconsistent, Error-Prone)
 
 Repository references:
 * https://github.com/f0lg0/CHIP-8 (Code Organization and Implementation)
 * https://github.com/queso-fuego/chip8_emulator_c (SDL2 Usage)
 * https://github.com/Timendus/chip8-test-suite (Test-Suite ROMs Collection)
+* https://github.com/mattmikolay/chip-8/wiki/CHIP‐8-Technical-Reference (Up-to-date Technical Reference)
 
 Social Media: - 
 * /r/EmuDev [Reddit]

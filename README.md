@@ -36,8 +36,8 @@ Website references:
 
 Repository references:
 * https://github.com/f0lg0/CHIP-8 (Code Organization and Opcode Implementation)
-* https://github.com/queso-fuego/chip8_emulator_c (SDL2 "How-to")
-
+* https://github.com/queso-fuego/chip8_emulator_c (SDL2 Usage)
+* https://github.com/Timendus/chip8-test-suite (Test ROMs Collection)
 Social Media: - 
 * /r/EmuDev [Reddit]
 * Emulator Development [Discord] (Thanks, Janitor Raus and Gulrak!)

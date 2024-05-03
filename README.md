@@ -28,6 +28,7 @@ The CHIP-8 Emulator is a classic virtual machine designed to run programs writte
 
 # Usage
 For Linux only
+`make`
 `./chip8 <path/to/file.ch8>`
 
 # Resources

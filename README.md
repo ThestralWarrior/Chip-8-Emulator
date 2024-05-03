@@ -1,5 +1,5 @@
 # CHIP-8 Emulator
-An implementation of the Chip-8 Emulator (or to be precise, Intepreter) in C
+An implementation of the Chip-8 Emulator (or to be precise, Interpreter) in C
 
 # Overview
 The CHIP-8 Emulator is a classic virtual machine designed to run programs written for the CHIP-8 instruction set. CHIP-8 is a simple interpreted language developed in the 70s for early microcomputers like the COSMAC VIP, offering a basic environment for creating simple games and applications. With a minimalist instruction set, basic graphics system, and simple sound capabilities, it was designed to be easy to program, making it popular among hobbyists and educators for learning about computer architecture and emulator development.
